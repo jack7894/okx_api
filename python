@@ -1,0 +1,37 @@
+# csv 基础信息
+filename = "tending_data.csv"
+data= [["time","open","high","low","close","confirm"]]
+after_data = 1715529600000 #最新的数据
+
+# 写入 CSV 文件
+with open(filename, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    # 写入数据
+    writer.writerows(data)
+    
+
+
+while True:
+    
+    # 获取指数K线数据
+    result = marketDataAPI.get_index_candlesticks(instId="BTC-USD",after=after_data,bar = '1D')
+    
+    # 追加新数据到 CSV 文件
+    with open(filename, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        # 写入数据
+        writer.writerows(tuple(result.values())[2]) 
+    
+    # 读取 CSV 文件，获取 last_row[0]
+    with open(filename, mode='r', newline='') as file:
+        reader = csv.reader(file, delimiter=',')  # 假设使用制表符分隔
+        last_row = None
+        for row in reader:
+            last_row = row  # 每次循环，last_row都会更新为当前行
+
+    if after_data != last_row[0]:
+        after_data = last_row[0]
+        # 暂停 10 秒
+        time.sleep(10) 
+    else:
+        break
